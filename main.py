@@ -13,12 +13,14 @@ import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QListWidget, QListWidgetItem, QWidget
+from docx import Document
 
 from app.utils.utils import get_os
 
 
 class UiMainWindow(object):
     def __init__(self):
+        self.refresh_button = None
         self.file_list_widget2 = None
         self.statusbar = None
         self.menubar = None
@@ -27,6 +29,7 @@ class UiMainWindow(object):
         self.central_widget = None
         self.groupBox = None
         self.file_list_widget = None
+        self.folder_path = None
 
     def setup_ui(self, main_window):
         main_window.setObjectName("MainWindow")
@@ -54,6 +57,10 @@ class UiMainWindow(object):
         self.pushButton.setGeometry(QtCore.QRect(10, 490, 113, 32))
         self.pushButton.setObjectName("pushButton")
 
+        self.refresh_button = QtWidgets.QPushButton(self.central_widget)
+        self.refresh_button.setGeometry(QtCore.QRect(150, 490, 113, 32))
+        self.refresh_button.clicked.connect(self.refresh_groupboxes)
+
         main_window.setCentralWidget(self.central_widget)
         self.menubar = QtWidgets.QMenuBar(main_window)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 24))
@@ -72,36 +79,20 @@ class UiMainWindow(object):
 
     def translate_ui(self, main_window):
         _translate = QtCore.QCoreApplication.translate
-        main_window.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        main_window.setWindowTitle(_translate("MainWindow", "文件审核过滤小工具"))
         self.groupBox.setTitle(_translate("MainWindow", "全部文件"))
         self.groupBox_2.setTitle(_translate("MainWindow", "未审核文件"))
         self.pushButton.setText(_translate("MainWindow", "选择文件夹"))
+        self.refresh_button.setText(_translate("MainWindow", "刷新"))
 
     def open_folder(self):
-        folder_path = QFileDialog.getExistingDirectory(None, "选择文件夹")
-        if folder_path:
-            file_names = os.listdir(folder_path)
-            self.file_list_widget.clear()
-            self.file_list_widget2.clear()
-            valid_extensions = ['.doc', '.docx', '.xls', '.xlsx', '.pdf', '.txt']
-            for file_name in file_names:
-                _, extension = os.path.splitext(file_name)
-                if extension.lower() in valid_extensions:
-                    file_path = os.path.join(folder_path, file_name)
-                    item = QListWidgetItem(file_name)
-                    item.setData(QtCore.Qt.UserRole, os.path.join(folder_path, file_name))
-                    self.file_list_widget.addItem(item)
-
-                    if not self.check_file_content(file_path, "主任已审核"):
-                        item = QListWidgetItem(file_name)
-                        item.setData(QtCore.Qt.UserRole, file_path)
-                        self.file_list_widget2.addItem(item)
+        self.folder_path = QFileDialog.getExistingDirectory(None, "选择文件夹")
+        self.refresh_groupboxes()
 
     def open_file(self, item):
         file_path = item.data(QtCore.Qt.UserRole)
         if file_path and os.path.isfile(file_path):
             os_type = get_os()
-            print(os_type)
             if os_type == 'Windows':
                 os.startfile(file_path)  # 在Windows系统中打开文件，适用于Word、Excel和PDF文件
             elif os_type == 'MacOS':
@@ -110,12 +101,39 @@ class UiMainWindow(object):
                 Exception("暂不支持此系统，请联系作者")
 
     def check_file_content(self, file_path, target_string):
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-            if target_string in content:
-                return True
-            else:
-                return False
+        file_type = os.path.splitext(file_path)[1]
+        if file_type in ['.doc', '.docx']:
+            doc = Document(file_path)
+            content = []
+            for paragraph in doc.paragraphs:
+                content.append(paragraph.text)
+        else:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+
+        if target_string in content:
+            return True
+        else:
+            return False
+
+    def refresh_groupboxes(self):
+        if self.folder_path:
+            file_names = os.listdir(self.folder_path)
+            self.file_list_widget.clear()
+            self.file_list_widget2.clear()
+            valid_extensions = ['.doc', '.docx', '.xls', '.xlsx', '.pdf', '.txt']
+            for file_name in file_names:
+                _, extension = os.path.splitext(file_name)
+                if extension.lower() in valid_extensions:
+                    file_path = os.path.join(self.folder_path, file_name)
+                    item = QListWidgetItem(file_name)
+                    item.setData(QtCore.Qt.UserRole, os.path.join(self.folder_path, file_name))
+                    self.file_list_widget.addItem(item)
+
+                    if not self.check_file_content(file_path, "主任已审核"):
+                        item = QListWidgetItem(file_name)
+                        item.setData(QtCore.Qt.UserRole, file_path)
+                        self.file_list_widget2.addItem(item)
 
 
 if __name__ == '__main__':
