@@ -1,22 +1,16 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
+class Ui_MainWindow1(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1920, 1080)  # 调整窗口大小为1920x1080
-
+        MainWindow.resize(810, 537)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.gridLayout.setContentsMargins(10, 10, 10, 10)  # 设置布局的外边距
-
         self.splitter = QtWidgets.QSplitter(self.centralwidget)
+        self.splitter.setGeometry(QtCore.QRect(10, 140, 791, 331))
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("splitter")
-        self.gridLayout.addWidget(self.splitter, 1, 0, 1, 2)  # 将splitter添加到布局中
 
         self.groupBox = QtWidgets.QGroupBox(self.splitter)
         self.groupBox.setObjectName("groupBox")
@@ -25,8 +19,8 @@ class Ui_MainWindow(object):
         self.groupBox_2.setObjectName("groupBox_2")
 
         self.widget = QtWidgets.QWidget(self.centralwidget)
+        self.widget.setGeometry(QtCore.QRect(10, 10, 412, 108))
         self.widget.setObjectName("widget")
-        self.gridLayout.addWidget(self.widget, 0, 0, 1, 2)  # 将widget添加到布局中
 
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.widget)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -70,7 +64,7 @@ class Ui_MainWindow(object):
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1920, 24))  # 设置菜单栏的宽度为1920
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 810, 24))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
 
